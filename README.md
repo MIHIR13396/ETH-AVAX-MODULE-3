@@ -24,78 +24,49 @@ The ERC-20 token has the following details:
 
 - **Name**: XeronToken
 - **Symbol**: XRN
-- **Decimals**: 12
-- **Total Supply**: Initial supply of 1000 tokens (1000 * 10^12 with 12 decimals) plus additional tokens minted to predefined addresses
+- **Decimals**: 18
+- **Total Supply**: Initial supply can be set during deployment or through subsequent minting.
 
 ## Token Functions
 
 The ERC-20 token smart contract provides the following functions:
 
-1. **mint(address _to, uint256 _amount)**
+1. **mint(address to, uint256 amount)**
    - This function allows the contract owner to mint new tokens and assign them to a specified address. Only the contract owner can call this function.
 
-2. **burn(uint256 _amount)**
+2. **burn(uint256 amount)**
    - This function allows any token holder to burn (destroy) their own tokens. The tokens are removed from circulation, and the total supply decreases accordingly.
 
-3. **transfer(address _to, uint256 _amount)**
+3. **transfer(address to, uint256 amount)**
    - This function allows users to transfer tokens to another address. The caller must have a sufficient balance to perform the transfer.
-  
+   -  This function is inherited from the OpenZeppelin ERC20 contract and does not need to be explicitly defined in our contract.
 
 ## Solidity Code
 
 ```solidity
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.0;
+pragma solidity ^0.8.0;
 
-contract MyUniqueToken {
-    string public name = "XeronToken";
-    string public symbol = "XRN";
-    uint8 public decimals = 12;
-    uint256 public totalSupply;
-    mapping(address => uint256) public balanceOf;
-    address public owner;
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Mint(address indexed to, uint256 value);
-    event Burn(address indexed from, uint256 value);
-
-    constructor() {
-        owner = msg.sender;
+contract XeronToken is ERC20, Ownable {
+    constructor() ERC20("XeronToken", "XRN") Ownable(msg.sender) {
+        // Initial minting can be done here if needed, for example:
+        // _mint(msg.sender, initialSupply);
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only the contract owner can call this function");
-        _;
+    function mint(address to, uint256 amount) public onlyOwner {
+        require(to != address(0), "Invalid address");
+        _mint(to, amount);
     }
 
-    function mint(address _to, uint256 _amount) public onlyOwner {
-        require(_to != address(0), "Invalid address");
-        totalSupply += _amount;
-        balanceOf[_to] += _amount;
-        emit Mint(_to, _amount);
-        emit Transfer(address(0), _to, _amount);
+    function burn(uint256 amount) public {
+        require(balanceOf(msg.sender) >= amount, "Insufficient balance");
+        _burn(msg.sender, amount);
     }
-
-    function burn(uint256 _amount) public {
-        require(balanceOf[msg.sender] >= _amount, "Insufficient balance");
-        balanceOf[msg.sender] -= _amount;
-        totalSupply -= _amount;
-        emit Burn(msg.sender, _amount);
-        emit Transfer(msg.sender, address(0), _amount);
-    }
-
-    function transfer(address _to, uint256 _amount) public {
-        require(_to != address(0), "Invalid address");
-        require(balanceOf[msg.sender] >= _amount, "Insufficient balance");
-        balanceOf[msg.sender] -= _amount;                         
-        // 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2 (Trasfer token to this address or any address you want)
-        balanceOf[_to] += _amount;
-        emit Transfer(msg.sender, _to, _amount);
-    }                                                                          
 }
-
-```
-     
+```  
 ## Deployment and Interactions
 
 To deploy and interact with the ERC-20 token smart contract, you can follow these steps:
