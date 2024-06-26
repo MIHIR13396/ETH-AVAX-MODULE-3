@@ -66,6 +66,7 @@ contract XeronToken is ERC20, Ownable {
         _burn(msg.sender, amount);
     }
 }
+// 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2 (Trasfer token to this address or any other address)
 ```  
 ## Deployment and Interactions
 
