@@ -19,6 +19,20 @@ contract XeronToken is ERC20, Ownable {
         require(balanceOf(msg.sender) >= amount, "Insufficient balance");
         _burn(msg.sender, amount);
     }
-}
-  // 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2 (Trasfer token to this address)
+
+    function transfer(address recipient, uint256 amount) public override returns (bool) {
+        require(recipient != address(0), "Invalid address");
+        _transfer(_msgSender(), recipient, amount);
+        return true;
+    }
+
+    function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
+        _transfer(sender, recipient, amount);
+        uint256 currentAllowance = allowance(sender, _msgSender());
+        require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
+        _approve(sender, _msgSender(), currentAllowance - amount);
+        return true;
+    }
+}// 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2 (Trasfer token to this address)
+
 
